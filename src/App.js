@@ -5,6 +5,7 @@ import { getDefaultConfig, RainbowKitProvider, ConnectButton } from '@rainbow-me
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { base, baseSepolia } from 'wagmi/chains';
+import PixelCanvas from './components/PixelCanvas.js';
 
 const config = getDefaultConfig({
   appName: 'My RainbowKit App',
@@ -35,7 +36,7 @@ function App() {
               <ConnectButton />
             </header>
             <main>
-              main
+              <PixelCanvas/>
             </main>
           </div>
         </RainbowKitProvider>
