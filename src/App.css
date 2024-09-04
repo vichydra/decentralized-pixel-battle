@@ -2,7 +2,7 @@
 .App {
   text-align: center;
   font-family: 'Arial', sans-serif;
-  background-color: #282c34;
+  background-color: #ffffff;
   color: white;
   min-height: 100vh;
   display: flex;
@@ -13,12 +13,13 @@
 
 /* Estilo para o cabeçalho */
 .App-header {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 1);
   width: 100%;
   display: flex;
   padding: 20px;
   justify-content: flex-end;
   box-sizing: border-box;
+  z-index: 10;
 }
 
 main {
