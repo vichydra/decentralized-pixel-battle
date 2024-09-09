@@ -9,7 +9,7 @@ import PixelCanvas from './components/PixelCanvas.js';
 
 const config = getDefaultConfig({
   appName: 'My RainbowKit App',
-  projectId: process.env.PROJECT_ID,
+  projectId: '2e9700383ee3aee70aff7f69991330d3',
   chains: [
     base, baseSepolia
   ],
