@@ -6,7 +6,7 @@
 
 html, body {
   height: 100%;
-  overflow: hidden; /* Impede overflow */
+  overflow: hidden;
 }
 
 .canva-container {
@@ -64,10 +64,4 @@ html, body {
 .canvas {
   border: 3px solid #000;
   cursor: crosshair;
-}
-
-.hover-square {
-  position: absolute;
-  pointer-events: none;
-  z-index: 10;
 }
