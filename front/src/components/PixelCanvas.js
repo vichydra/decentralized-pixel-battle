@@ -67,7 +67,6 @@ const PixelCanvas = () => {
       setPixelState(updatedPixelState);
     } else {
       alert('This pixel is locked until ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
-      return;
     }
   };
 
