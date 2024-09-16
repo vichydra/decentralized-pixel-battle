@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './PixelCanvas.css';
+import ColorSelector from './ColorSelector';
 
 const WIDTH = 160;
 const HEIGHT = 90;
@@ -53,7 +54,7 @@ const PixelCanvas = () => {
 
   const handleZoomOut = () => {
     setTransformOrigin({ x: '50%', y: '50%' });
-    setScale((prevScale) => Math.max(prevScale - 0.1, 0.5));
+    setScale((prevScale) => Math.max(prevScale - 0.1, 0.3));
   };
 
   const handleWheel = (e) => {
@@ -82,24 +83,13 @@ const PixelCanvas = () => {
   return (
     <div className="pixel-canvas-wrapper">
       <div className="zoom-controls">
-        <button onClick={handleZoomIn}>Zoom In</button>
-        <button onClick={handleZoomOut}>Zoom Out</button>
+        <button onClick={handleZoomIn} className="zoom-in-button"><img alt="zoom-in" className="zoom-in-img" src="https://www.svgrepo.com/show/2087/plus.svg"></img></button>
+        <button onClick={handleZoomOut} className="zoom-out-button"><img alt="zoom-out" className="zoom-out-img" src="https://www.svgrepo.com/show/45046/minus.svg"></img></button>
+        {/* mais um botao para centralizar */}
       </div>
-        <div className="color-menu">
-          {['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#000000', '#FFFFFF'].map((color) => (
-            <div
-              key={color}
-              className="color-swatch"
-              style={{
-                backgroundColor: color,
-                width: selectedColor === color ? '48px' : '40px',
-                height: selectedColor === color ? '48px' : '40px',
-                border: selectedColor === color ? '2px solid black' : 'none',
-              }}
-              onClick={() => handleColorChange(color)}
-            />
-          ))}
-        </div>
+      <div className="selectors">
+        <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
+      </div>
       <div
         className="canva-container"
         onWheel={handleWheel}
