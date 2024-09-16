@@ -15,6 +15,7 @@ const PixelCanvas = () => {
   const [selectedTimeLock, setSelectedTimeLock] = useState(oneMinuteLater);
   const [selectedColor, setSelectedColor] = useState('#ffffff');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
+  const [hasMoved, setHasMoved] = useState(false);
   const [scale, setScale] = useState(0.3);
   const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
   const [dragging, setDragging] = useState(false);
@@ -37,34 +38,39 @@ const PixelCanvas = () => {
     const x = Math.floor((e.clientX - rect.left) / (PIXEL_SIZE * scale)) * PIXEL_SIZE;
     const y = Math.floor((e.clientY - rect.top) / (PIXEL_SIZE * scale)) * PIXEL_SIZE;
     setHoveredPixel({ x, y });
-
+  
     if (dragging) {
       const dx = e.clientX - startDrag.x;
       const dy = e.clientY - startDrag.y;
       setCanvasPosition({ x: canvasPosition.x + dx, y: canvasPosition.y + dy });
       setStartDrag({ x: e.clientX, y: e.clientY });
+  
+      setHasMoved(true);
     }
   };
+  
 
   const handleMouseClick = async () => {
+    if (dragging || hasMoved) return;
+  
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const pixelX = hoveredPixel.x / PIXEL_SIZE;
     const pixelY = hoveredPixel.y / PIXEL_SIZE;
     const currentTime = Date.now();
-
+  
     if (currentTime > pixelState[pixelY][pixelX].timestamp) {
       ctx.fillStyle = selectedColor;
       ctx.fillRect(hoveredPixel.x, hoveredPixel.y, PIXEL_SIZE, PIXEL_SIZE);
-
+  
       const updatedPixelState = [...pixelState];
       updatedPixelState[pixelY][pixelX] = {
         color: selectedColor,
         timestamp: currentTime + selectedTimeLock
       };
       setPixelState(updatedPixelState);
-
-      // Save the updated pixel
+  
+      // Salvar o pixel atualizado
       await setDoc(doc(db, "pixelState", `${pixelX}-${pixelY}`), {
         x: pixelX,
         y: pixelY,
@@ -72,7 +78,7 @@ const PixelCanvas = () => {
         timestamp: currentTime + selectedTimeLock
       });
     } else {
-      alert('This pixel is locked until ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
+      alert('Este pixel está bloqueado até ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
     }
   };
 
@@ -97,7 +103,9 @@ const PixelCanvas = () => {
   const handleMouseDown = (e) => {
     setDragging(true);
     setStartDrag({ x: e.clientX, y: e.clientY });
+    setHasMoved(false);  
   };
+  
 
   const handleMouseUp = () => {
     setDragging(false);
