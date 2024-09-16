@@ -81,14 +81,9 @@ const PixelCanvas = () => {
     }
   };
   
-  const handleZoomIn = (e) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) / rect.width;
-    const mouseY = (e.clientY - rect.top) / rect.height;
-
-    setTransformOrigin({ x: `${mouseX * 100}%`, y: `${mouseY * 100}%` });
-    setScale((prevScale) => Math.min(prevScale + 0.1, 3));
+  const handleZoomIn = () => {
+    setTransformOrigin({ x: '50%', y: '50%' });
+    setScale((prevScale) => Math.max(prevScale + 0.1, 0.3));
   };
 
   const handleZoomOut = () => {
