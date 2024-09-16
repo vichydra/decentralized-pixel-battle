@@ -33,7 +33,7 @@ function App() {
         <RainbowKitProvider>
           <div className="App">
             <header className="App-header">
-              <ConnectButton />
+              {/*<ConnectButton />*/}
             </header>
             <main>
               <PixelCanvas/>
