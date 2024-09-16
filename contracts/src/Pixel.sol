@@ -49,7 +49,6 @@ contract Pixel is ERC20 {
 
         // Calculate fee and amount after fee
         uint256 fee = (usdcAmount * FEE_RATE) / 10000;
-        uint256 amountAfterFee = usdcAmount - fee;
 
         // Transfer fee to treasury
         require(
@@ -120,11 +119,9 @@ contract Pixel is ERC20 {
     // Prevent sending tokens while rights are delegated
     function _beforeTokenTransfer(
         address from,
-        address to,
-        uint256 amount
-    ) internal override {
-        super._beforeTokenTransfer(from, to, amount);
-
+        address,
+        uint256 
+    ) internal view{
         // Prevent transfers if the sender has delegated their rights
         require(delegatedTo[from] == address(0), "Cannot transfer tokens while rights are delegated");
     }
