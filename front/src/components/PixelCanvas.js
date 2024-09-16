@@ -18,7 +18,7 @@ const PixelCanvas = () => {
   const [scale, setScale] = useState(0.3);
   const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
   const [dragging, setDragging] = useState(false);
-  const [canvasPosition, setCanvasPosition] = useState({ x: -10, y: -0.6 * windowH });
+  const [canvasPosition, setCanvasPosition] = useState({ x: -10, y: -0.61 * windowH });
   const [startDrag, setStartDrag] = useState({ x: 0, y: 0 });
 
   const [pixelState, setPixelState] = useState(
