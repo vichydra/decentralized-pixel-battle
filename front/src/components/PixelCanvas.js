@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './PixelCanvas.css';
 import ColorSelector from './ColorSelector';
-import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebase';  // Assuming you have firebase.js in the same folder
 
 const WIDTH = 160;
@@ -27,6 +27,29 @@ const PixelCanvas = () => {
       Array.from({ length: WIDTH }, () => ({ color: '#b6b6b6', timestamp: 0 }))
     )
   );
+
+  const handleTimeLockChange = (time) => {
+    setSelectedTimeLock(time);
+  };
+
+  const handleColorChange = (color) => {
+    setSelectedColor(color);
+  };
+
+  const handleMouseMove = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / (PIXEL_SIZE * scale)) * PIXEL_SIZE;
+    const y = Math.floor((e.clientY - rect.top) / (PIXEL_SIZE * scale)) * PIXEL_SIZE;
+    setHoveredPixel({ x, y });
+
+    if (dragging) {
+      const dx = e.clientX - startDrag.x;
+      const dy = e.clientY - startDrag.y;
+      setCanvasPosition({ x: canvasPosition.x + dx, y: canvasPosition.y + dy });
+      setStartDrag({ x: e.clientX, y: e.clientY });
+    }
+  };
 
   const handleMouseClick = async () => {
     const canvas = canvasRef.current;
@@ -58,21 +81,111 @@ const PixelCanvas = () => {
     }
   };
   
+  const handleZoomIn = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left) / rect.width;
+    const mouseY = (e.clientY - rect.top) / rect.height;
+
+    setTransformOrigin({ x: `${mouseX * 100}%`, y: `${mouseY * 100}%` });
+    setScale((prevScale) => Math.min(prevScale + 0.1, 3));
+  };
+
+  const handleZoomOut = () => {
+    setTransformOrigin({ x: '50%', y: '50%' });
+    setScale((prevScale) => Math.max(prevScale - 0.1, 0.3));
+  };
+
+  const handleWheel = (e) => {
+    if (e.deltaY < 0) {
+      handleZoomIn(e);
+    } else {
+      handleZoomOut();
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    setDragging(true);
+    setStartDrag({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "pixelState"), (snapshot) => {
+    const fetchPixelState = async () => {
+      const querySnapshot = await getDocs(collection(db, "pixelState"));
       const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
   
-      snapshot.forEach((doc) => {
+      querySnapshot.forEach((doc) => {
         const { x, y, color, timestamp } = doc.data();
         newPixelState[y][x] = { color, timestamp };
       });
   
       setPixelState(newPixelState);
       redrawCanvas(newPixelState);
-    });
-
-    return () => unsubscribe(); // Clean up the listener when the component unmounts
+    };
+  
+    fetchPixelState();
   }, []);  
+
+  const handleSave = () => {
+    const binaryArray = [];
+
+    for (let y = 0; y < HEIGHT; y++) {
+      for (let x = 0; x < WIDTH; x++) {
+        const { color, timestamp } = pixelState[y][x];
+
+        const colorInt = parseInt(color.slice(1), 16);
+        binaryArray.push((colorInt >> 16) & 255); // Red
+        binaryArray.push((colorInt >> 8) & 255);  // Green
+        binaryArray.push(colorInt & 255);         // Blue
+
+        const timestampBytes = new Uint8Array(new Uint32Array([timestamp]).buffer);
+        binaryArray.push(...timestampBytes);
+      }
+    }
+
+    const blob = new Blob([new Uint8Array(binaryArray)], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'canvas_state.bin';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoad = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const binaryArray = new Uint8Array(e.target.result);
+      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
+
+      let index = 0;
+      for (let y = 0; y < HEIGHT; y++) {
+        for (let x = 0; x < WIDTH; x++) {
+          const red = binaryArray[index++];
+          const green = binaryArray[index++];
+          const blue = binaryArray[index++];
+          const color = `#${((1 << 24) | (red << 16) | (green << 8) | blue).toString(16).slice(1).toUpperCase()}`;
+
+          const timestampBytes = binaryArray.slice(index, index + 4);
+          const timestamp = new DataView(timestampBytes.buffer).getUint32(0, true);
+          index += 4;
+
+          newPixelState[y][x] = { color, timestamp };
+        }
+      }
+
+      setPixelState(newPixelState);
+      redrawCanvas(newPixelState);
+    };
+    reader.readAsArrayBuffer(file);
+  };
 
   const redrawCanvas = (newPixelState) => {
     const canvas = canvasRef.current;
