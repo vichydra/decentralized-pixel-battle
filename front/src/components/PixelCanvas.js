@@ -112,7 +112,7 @@ const PixelCanvas = () => {
   useEffect(() => {
     // Set up a real-time listener for pixel state changes
     const unsubscribe = onSnapshot(collection(db, "pixelState"), (snapshot) => {
-      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
+      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#000000', timestamp: 0 }));
   
       snapshot.forEach((doc) => {
         const { x, y, color, timestamp } = doc.data();
