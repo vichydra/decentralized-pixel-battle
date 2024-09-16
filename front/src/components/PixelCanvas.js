@@ -24,7 +24,7 @@ const PixelCanvas = () => {
 
   const [pixelState, setPixelState] = useState(
     Array.from({ length: HEIGHT }, () =>
-      Array.from({ length: WIDTH }, () => ({ color: '#FFFFFF', timestamp: 0 }))
+      Array.from({ length: WIDTH }, () => ({ color: '#b6b6b6', timestamp: 0 }))
     )
   );
 
