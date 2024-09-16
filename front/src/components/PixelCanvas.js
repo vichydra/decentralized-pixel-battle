@@ -2,14 +2,13 @@ import React, { useRef, useState, useEffect } from 'react';
 import './PixelCanvas.css';
 import ColorSelector from './ColorSelector';
 import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';  // Assuming you have firebase.js in the same folder
+import { db } from '../firebase';
 
 const WIDTH = 160;
 const HEIGHT = 90;
 const PIXEL_SIZE = 20;
 const windowH = window.innerHeight;
-
-const oneMinuteLater = 1 * 60 * 1000; 
+const oneMinuteLater = 1 * 60 * 1000;
 
 const PixelCanvas = () => {
   const canvasRef = useRef(null);
@@ -53,18 +52,18 @@ const PixelCanvas = () => {
     const pixelX = hoveredPixel.x / PIXEL_SIZE;
     const pixelY = hoveredPixel.y / PIXEL_SIZE;
     const currentTime = Date.now();
-  
+
     if (currentTime > pixelState[pixelY][pixelX].timestamp) {
       ctx.fillStyle = selectedColor;
       ctx.fillRect(hoveredPixel.x, hoveredPixel.y, PIXEL_SIZE, PIXEL_SIZE);
-  
+
       const updatedPixelState = [...pixelState];
       updatedPixelState[pixelY][pixelX] = {
         color: selectedColor,
         timestamp: currentTime + selectedTimeLock
       };
       setPixelState(updatedPixelState);
-  
+
       // Save the updated pixel
       await setDoc(doc(db, "pixelState", `${pixelX}-${pixelY}`), {
         x: pixelX,
@@ -76,7 +75,7 @@ const PixelCanvas = () => {
       alert('This pixel is locked until ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
     }
   };
-  
+
   const handleZoomIn = () => {
     setTransformOrigin({ x: '50%', y: '50%' });
     setScale((prevScale) => Math.max(prevScale + 0.1, 0.3));
@@ -151,43 +150,66 @@ const PixelCanvas = () => {
     }
 
     const blob = new Blob([new Uint8Array(binaryArray)], { type: 'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'canvas_state.bin';
-    a.click();
-    URL.revokeObjectURL(url);
+    uploadBlob(blob);
   };
 
-  const handleLoad = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const uploadBlob = async (blob) => {
+    const publisherUrl = 'https://publisher-devnet.walrus.space';
+    const aggregatorUrl = 'https://aggregator-devnet.walrus.space';
+    const numEpochs = 1;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryArray = new Uint8Array(e.target.result);
-      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
+    try {
+      const response = await fetch(`${publisherUrl}/v1/store?epochs=${numEpochs}`, {
+        method: 'PUT',
+        body: blob,
+      });
 
-      let index = 0;
-      for (let y = 0; y < HEIGHT; y++) {
-        for (let x = 0; x < WIDTH; x++) {
-          const red = binaryArray[index++];
-          const green = binaryArray[index++];
-          const blue = binaryArray[index++];
-          const color = `#${((1 << 24) | (red << 16) | (green << 8) | blue).toString(16).slice(1).toUpperCase()}`;
-
-          const timestampBytes = binaryArray.slice(index, index + 4);
-          const timestamp = new DataView(timestampBytes.buffer).getUint32(0, true);
-          index += 4;
-
-          newPixelState[y][x] = { color, timestamp };
-        }
+      if (response.status === 200) {
+        const storageInfo = await response.json();
+        displayUpload(storageInfo, blob.type, aggregatorUrl);
+      } else {
+        throw new Error('Something went wrong when storing the blob!');
       }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('An error occurred while uploading the file. Please check the console for details.');
+    }
+  };
 
-      setPixelState(newPixelState);
-      redrawCanvas(newPixelState);
-    };
-    reader.readAsArrayBuffer(file);
+  const displayUpload = (storageInfo, mediaType, aggregatorUrl) => {
+    let info = {};
+    const SUI_NETWORK = "testnet";
+    const SUI_VIEW_TX_URL = `https://suiscan.xyz/${SUI_NETWORK}/tx`;
+    const SUI_VIEW_OBJECT_URL = `https://suiscan.xyz/${SUI_NETWORK}/object`;
+
+    if ('alreadyCertified' in storageInfo) {
+      info = {
+        status: 'Already certified',
+        blobId: storageInfo.alreadyCertified.blobId,
+        endEpoch: storageInfo.alreadyCertified.endEpoch,
+        suiRefType: 'Previous Sui Certified Event',
+        suiRef: storageInfo.alreadyCertified.event.txDigest,
+        suiBaseUrl: SUI_VIEW_TX_URL,
+      };
+    } else if ('newlyCreated' in storageInfo) {
+      info = {
+        status: 'Newly created',
+        blobId: storageInfo.newlyCreated.blobObject.blobId,
+        endEpoch: storageInfo.newlyCreated.blobObject.storage.endEpoch,
+        suiRefType: 'Associated Sui Object',
+        suiRef: storageInfo.newlyCreated.blobObject.id,
+        suiBaseUrl: SUI_VIEW_OBJECT_URL,
+      };
+    } else {
+      throw new Error('Unhandled successful response!');
+    }
+
+    const blobUrl = `${aggregatorUrl}/v1/${info.blobId}`;
+    const suiUrl = `${info.suiBaseUrl}/${info.suiRef}`;
+
+    console.log(`Blob successfully uploaded: ${blobUrl}`);
+    console.log(`Sui Object URL: ${suiUrl}`);
+    alert(`Blob uploaded successfully! Blob ID: ${info.blobId}`);
   };
 
   return (
@@ -202,6 +224,9 @@ const PixelCanvas = () => {
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
+      </div>
+      <div className="save-walrus-container">
+        <button onClick={handleSave} className="btn btn-primary">Save on Walrus</button>
       </div>
       <div
         className="canva-container"

@@ -20,7 +20,7 @@ html, body {
   background-color: #000000;
 }
 
-.selectors{
+.selectors {
   display: flex;
   justify-content: center;
   align-items: self-end;
@@ -48,7 +48,7 @@ html, body {
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   opacity: 0.9;
-  background-color: #be63da
+  background-color: #be63da;
 }
 
 .zoom-controls button:hover {
@@ -56,7 +56,7 @@ html, body {
   transition: .1s ease-in-out;
 }
 
-.zoom-in-img, .zoom-out-img{
+.zoom-in-img, .zoom-out-img {
   width: 20px;
   height: 20px;
 }
@@ -64,4 +64,31 @@ html, body {
 .canvas {
   border: 3px solid #ffffff;
   cursor: crosshair;
+}
+
+.save-walrus-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 20;
+}
+
+.save-walrus-container button {
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 2px solid #420b3e;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  font-size: 16px;
+  font-weight: bold;
+  color: #420b3e;
+  opacity: 0.9;
+  transition: background-color 0.3s ease;
+}
+
+.save-walrus-container button:hover {
+  background-color: #be63da;
+  color: #ffffff;
+  transition: 0.2s ease-in-out;
 }
