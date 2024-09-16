@@ -13,8 +13,8 @@ const PixelCanvas = () => {
   const [selectedTimeLock, setSelectedTimeLock] = useState(oneMinuteLater);
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
-  const [scale, setScale] = useState(0.3);
-  const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '50%' });
+  const [scale, setScale] = useState(0.8);
+  const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
   const [dragging, setDragging] = useState(false);
   const [canvasPosition, setCanvasPosition] = useState({ x: 0, y: -900 });
   const [startDrag, setStartDrag] = useState({ x: 0, y: 0 });

@@ -6,6 +6,7 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { base, baseSepolia } from 'wagmi/chains';
 import PixelCanvas from './components/PixelCanvas.js';
+import logo from './assets/logo.svg'; // Import logo.svg
 
 const config = getDefaultConfig({
   appName: 'My RainbowKit App',
@@ -33,8 +34,11 @@ function App() {
         <RainbowKitProvider>
           <div className="App">
             <header className="App-header">
-              {/*<ConnectButton />*/}
-            </header>
+              <div className="logo-container">
+                <img src={logo} alt="Logo" className="logo-icon" />
+                <span className="logo-text">PIXELSPACE</span>
+              </div>
+            </header> 
             <main>
               <PixelCanvas/>
             </main>

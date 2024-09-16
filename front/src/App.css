@@ -1,9 +1,13 @@
-/* Estilo geral da aplicação */
+@font-face {
+  font-family: 'Minecraft';
+  src: url('./assets/Minecraft.ttf') format('truetype');
+}
+
 .App {
   text-align: center;
   font-family: 'Arial', sans-serif;
-  background-color: #ffffff;
-  color: white;
+  background-color: #000000;
+  color: rgb(15, 15, 15);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,15 +15,33 @@
   justify-content: center;
 }
 
-/* Estilo para o cabeçalho */
 .App-header {
   background-color: rgba(0, 0, 0, 1);
   width: 100%;
   display: flex;
   padding: 20px;
-  justify-content: flex-end;
+  justify-content: space-between; 
+  align-items: center;
   box-sizing: border-box;
   z-index: 10;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin-left: 5%;
+}
+
+.logo-icon {
+  width: 40px; 
+  height: 40px;
+  margin-right: 10px;
+}
+
+.logo-text {
+  font-family: 'Minecraft', sans-serif;
+  font-size: 24px;
+  color: #ffffff; 
 }
 
 main {

@@ -17,7 +17,7 @@ html, body {
   height: 100vh;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
+  background-color: #000000;
 }
 
 .selectors{
@@ -62,6 +62,6 @@ html, body {
 }
 
 .canvas {
-  border: 3px solid #000;
+  border: 3px solid #ffffff;
   cursor: crosshair;
 }
