@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './PixelCanvas.css';
 import ColorSelector from './ColorSelector';
+import { doc, setDoc, getDocs, collection } from 'firebase/firestore';
+import { db } from '../firebase';  // Assuming you have firebase.js in the same folder
 
 const WIDTH = 160;
 const HEIGHT = 90;
@@ -48,28 +50,36 @@ const PixelCanvas = () => {
     }
   };
 
-  const handleMouseClick = () => {
+  const handleMouseClick = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const pixelX = hoveredPixel.x / PIXEL_SIZE;
     const pixelY = hoveredPixel.y / PIXEL_SIZE;
     const currentTime = Date.now();
-
+  
     if (currentTime > pixelState[pixelY][pixelX].timestamp) {
       ctx.fillStyle = selectedColor;
       ctx.fillRect(hoveredPixel.x, hoveredPixel.y, PIXEL_SIZE, PIXEL_SIZE);
-
+  
       const updatedPixelState = [...pixelState];
       updatedPixelState[pixelY][pixelX] = {
         color: selectedColor,
         timestamp: currentTime + selectedTimeLock
       };
       setPixelState(updatedPixelState);
+  
+      // Save the updated pixel
+      await setDoc(doc(db, "pixelState", `${pixelX}-${pixelY}`), {
+        x: pixelX,
+        y: pixelY,
+        color: selectedColor,
+        timestamp: currentTime + selectedTimeLock
+      });
     } else {
       alert('This pixel is locked until ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
     }
   };
-
+  
   const handleZoomIn = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -103,10 +113,21 @@ const PixelCanvas = () => {
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, WIDTH * PIXEL_SIZE, HEIGHT * PIXEL_SIZE);
-  }, []);
+    const fetchPixelState = async () => {
+      const querySnapshot = await getDocs(collection(db, "pixelState"));
+      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
+  
+      querySnapshot.forEach((doc) => {
+        const { x, y, color, timestamp } = doc.data();
+        newPixelState[y][x] = { color, timestamp };
+      });
+  
+      setPixelState(newPixelState);
+      redrawCanvas(newPixelState);
+    };
+  
+    fetchPixelState();
+  }, []);  
 
   const handleSave = () => {
     const binaryArray = [];
