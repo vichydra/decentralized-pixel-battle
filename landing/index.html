@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelSpace</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <style>
+    @font-face {
+        font-family: 'Minecraft';
+        src: url('./Minecraft.ttf') format('truetype');
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+      overflow: hidden;
+    }
+
+    .center-text {
+      text-align: center;
+      position: absolute;
+      color: white;
+      z-index: 1;
+    }
+
+    .center-text .small {
+      font-size: 20px;
+      font-family: 'Minecraft', sans-serif;
+    }
+
+    .center-text .big {
+      font-size: 80px;
+      font-family: 'Minecraft', sans-serif;
+      margin: 10px 0;
+    }
+
+    .center-text .medium {
+      font-size: 24px;
+      font-family: 'Minecraft', sans-serif;
+      margin: 10px 0;
+    }
+
+    .center-text .buttons {
+      margin-top: 20px;
+    }
+
+    .center-text .buttons button {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 18px;
+      font-family: 'Minecraft', sans-serif;
+      cursor: pointer;
+      background-color: rgb(118, 118, 212);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .center-text .buttons button:hover {
+      background-color: darkblue;
+    }
+
+    .canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      filter: blur(10px); /* Added blur effect */
+    }
+
+    canvas {
+      display: block;
+      background-color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="center-text">
+    <div class="small">WELCOME TO</div>
+    <div class="big">PIXELSPACE</div>
+    <div class="medium">Compete for space and leave your mark on the new Web.</div>
+    <div class="buttons">
+        <button onclick="window.open('https://dapp-pixelspace.vercel.app', '_blank');">Open dApp</button>
+        <button onclick="window.open('https://github.com/vichydra/decentralized-pixel-battle', '_blank');">Our GitHub</button>
+    </div>      
+  </div>
+  <div class="canvas-container">
+    <canvas id="pixelCanvas"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('pixelCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pixelSize = 10;
+    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF'];
+
+    function drawPixel(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+    }
+
+    function randomPixel() {
+      const x = Math.floor(Math.random() * (canvas.width / pixelSize));
+      const y = Math.floor(Math.random() * (canvas.height / pixelSize));
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      drawPixel(x, y, color);
+    }
+
+    function animatePixels() {
+      randomPixel();
+      setTimeout(animatePixels, 100); // Change 100 to control pixel speed
+    }
+
+    animatePixels();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
