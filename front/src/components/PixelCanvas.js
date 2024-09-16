@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './PixelCanvas.css';
 import ColorSelector from './ColorSelector';
-import { doc, setDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';  // Assuming you have firebase.js in the same folder
 
 const WIDTH = 160;
@@ -14,7 +14,7 @@ const oneMinuteLater = 1 * 60 * 1000;
 const PixelCanvas = () => {
   const canvasRef = useRef(null);
   const [selectedTimeLock, setSelectedTimeLock] = useState(oneMinuteLater);
-  const [selectedColor, setSelectedColor] = useState('#000000');
+  const [selectedColor, setSelectedColor] = useState('#ffffff');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
   const [scale, setScale] = useState(0.3);
   const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
@@ -24,13 +24,9 @@ const PixelCanvas = () => {
 
   const [pixelState, setPixelState] = useState(
     Array.from({ length: HEIGHT }, () =>
-      Array.from({ length: WIDTH }, () => ({ color: '#FFFFFF', timestamp: 0 }))
+      Array.from({ length: WIDTH }, () => ({ color: '#b6b6b6', timestamp: 0 }))
     )
   );
-
-  const handleTimeLockChange = (time) => {
-    setSelectedTimeLock(time);
-  };
 
   const handleColorChange = (color) => {
     setSelectedColor(color);
@@ -109,21 +105,33 @@ const PixelCanvas = () => {
   };
 
   useEffect(() => {
-    const fetchPixelState = async () => {
-      const querySnapshot = await getDocs(collection(db, "pixelState"));
-      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
+    // Set up a real-time listener for pixel state changes
+    const unsubscribe = onSnapshot(collection(db, "pixelState"), (snapshot) => {
+      const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#000000', timestamp: 0 }));
   
-      querySnapshot.forEach((doc) => {
+      snapshot.forEach((doc) => {
         const { x, y, color, timestamp } = doc.data();
         newPixelState[y][x] = { color, timestamp };
       });
   
       setPixelState(newPixelState);
       redrawCanvas(newPixelState);
-    };
-  
-    fetchPixelState();
+    });
+
+    return () => unsubscribe(); // Clean up the listener when the component unmounts
   }, []);  
+
+  const redrawCanvas = (newPixelState) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    for (let y = 0; y < HEIGHT; y++) {
+      for (let x = 0; x < WIDTH; x++) {
+        ctx.fillStyle = newPixelState[y][x].color;
+        ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+      }
+    }
+  };
 
   const handleSave = () => {
     const binaryArray = [];
@@ -182,23 +190,15 @@ const PixelCanvas = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const redrawCanvas = (newPixelState) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    for (let y = 0; y < HEIGHT; y++) {
-      for (let x = 0; x < WIDTH; x++) {
-        ctx.fillStyle = newPixelState[y][x].color;
-        ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
-      }
-    }
-  };
-
   return (
     <div className="pixel-canvas-wrapper">
       <div className="zoom-controls">
-        <button onClick={handleZoomIn} className="zoom-in-button"><img alt="zoom-in" className="zoom-in-img" src="https://www.svgrepo.com/show/2087/plus.svg"></img></button>
-        <button onClick={handleZoomOut} className="zoom-out-button"><img alt="zoom-out" className="zoom-out-img" src="https://www.svgrepo.com/show/45046/minus.svg"></img></button>
+        <button onClick={handleZoomIn} className="zoom-in-button">
+          <img alt="zoom-in" className="zoom-in-img" src="https://www.svgrepo.com/show/2087/plus.svg" />
+        </button>
+        <button onClick={handleZoomOut} className="zoom-out-button">
+          <img alt="zoom-out" className="zoom-out-img" src="https://www.svgrepo.com/show/45046/minus.svg" />
+        </button>
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
