@@ -6,24 +6,19 @@ const WIDTH = 160;
 const HEIGHT = 90;
 const PIXEL_SIZE = 20;
 
-const tenMinutesLater = 10 * 60 * 1000;    // 10 minutes
-const thirtyMinutesLater = 30 * 60 * 1000; // 30 minutes
-const oneHourLater = 1 * 60 * 60 * 1000;   // 1 hour
-const twelveHoursLater = 12 * 60 * 60 * 1000; // 12 hours
-const twentyFourHoursLater = 24 * 60 * 60 * 1000; // 24 hours
+const oneMinuteLater = 1 * 60 * 1000; 
 
 const PixelCanvas = () => {
   const canvasRef = useRef(null);
-  const [selectedTimeLock, setSelectedTimeLock] = useState(tenMinutesLater);
+  const [selectedTimeLock, setSelectedTimeLock] = useState(oneMinuteLater);
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(0.3);
   const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '50%' });
   const [dragging, setDragging] = useState(false);
-  const [canvasPosition, setCanvasPosition] = useState({ x: 0, y: 0 });
+  const [canvasPosition, setCanvasPosition] = useState({ x: 0, y: -900 });
   const [startDrag, setStartDrag] = useState({ x: 0, y: 0 });
 
-  // Initialize pixel state, each pixel has {color: '#FFFFFF', timestamp: 0}
   const [pixelState, setPixelState] = useState(
     Array.from({ length: HEIGHT }, () =>
       Array.from({ length: WIDTH }, () => ({ color: '#FFFFFF', timestamp: 0 }))
@@ -60,7 +55,6 @@ const PixelCanvas = () => {
     const pixelY = hoveredPixel.y / PIXEL_SIZE;
     const currentTime = Date.now();
 
-    // Check if the pixel is locked (current time is before the timestamp)
     if (currentTime > pixelState[pixelY][pixelX].timestamp) {
       ctx.fillStyle = selectedColor;
       ctx.fillRect(hoveredPixel.x, hoveredPixel.y, PIXEL_SIZE, PIXEL_SIZE);
@@ -115,22 +109,18 @@ const PixelCanvas = () => {
     ctx.clearRect(0, 0, WIDTH * PIXEL_SIZE, HEIGHT * PIXEL_SIZE);
   }, []);
 
-  // Save the canvas state
   const handleSave = () => {
     const binaryArray = [];
 
-    // Flatten the 2D pixelState array into a binary array
     for (let y = 0; y < HEIGHT; y++) {
       for (let x = 0; x < WIDTH; x++) {
         const { color, timestamp } = pixelState[y][x];
 
-        // Convert color hex to RGB values and push each component to the array
         const colorInt = parseInt(color.slice(1), 16);
         binaryArray.push((colorInt >> 16) & 255); // Red
         binaryArray.push((colorInt >> 8) & 255);  // Green
         binaryArray.push(colorInt & 255);         // Blue
 
-        // Save timestamp as a 32-bit integer (4 bytes)
         const timestampBytes = new Uint8Array(new Uint32Array([timestamp]).buffer);
         binaryArray.push(...timestampBytes);
       }
@@ -142,10 +132,9 @@ const PixelCanvas = () => {
     a.href = url;
     a.download = 'canvas_state.bin';
     a.click();
-    URL.revokeObjectURL(url); // Clean up the URL object
+    URL.revokeObjectURL(url);
   };
 
-  // Load the binary file and update the pixelState
   const handleLoad = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -155,7 +144,6 @@ const PixelCanvas = () => {
       const binaryArray = new Uint8Array(e.target.result);
       const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#FFFFFF', timestamp: 0 }));
 
-      // Iterate through the binary data to restore pixel state and color
       let index = 0;
       for (let y = 0; y < HEIGHT; y++) {
         for (let x = 0; x < WIDTH; x++) {
@@ -164,7 +152,6 @@ const PixelCanvas = () => {
           const blue = binaryArray[index++];
           const color = `#${((1 << 24) | (red << 16) | (green << 8) | blue).toString(16).slice(1).toUpperCase()}`;
 
-          // Restore timestamp from the next 4 bytes
           const timestampBytes = binaryArray.slice(index, index + 4);
           const timestamp = new DataView(timestampBytes.buffer).getUint32(0, true);
           index += 4;
@@ -179,7 +166,6 @@ const PixelCanvas = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // Redraw the canvas based on the pixelState
   const redrawCanvas = (newPixelState) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -197,7 +183,6 @@ const PixelCanvas = () => {
       <div className="zoom-controls">
         <button onClick={handleZoomIn} className="zoom-in-button"><img alt="zoom-in" className="zoom-in-img" src="https://www.svgrepo.com/show/2087/plus.svg"></img></button>
         <button onClick={handleZoomOut} className="zoom-out-button"><img alt="zoom-out" className="zoom-out-img" src="https://www.svgrepo.com/show/45046/minus.svg"></img></button>
-        {/* mais um botao para centralizar */}
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
@@ -221,16 +206,6 @@ const PixelCanvas = () => {
           style={{
             transform: `scale(${scale})`,
             transformOrigin: `${transformOrigin.x} ${transformOrigin.y}`,
-          }}
-        />
-        <div
-          className="hover-square"
-          style={{
-            width: PIXEL_SIZE * scale,
-            height: PIXEL_SIZE * scale,
-            left: hoveredPixel.x * scale,
-            top: hoveredPixel.y * scale,
-            border: '1px solid black',
           }}
         />
       </div>
