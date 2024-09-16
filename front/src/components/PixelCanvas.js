@@ -14,7 +14,7 @@ const oneMinuteLater = 1 * 60 * 1000;
 const PixelCanvas = () => {
   const canvasRef = useRef(null);
   const [selectedTimeLock, setSelectedTimeLock] = useState(oneMinuteLater);
-  const [selectedColor, setSelectedColor] = useState('#000000');
+  const [selectedColor, setSelectedColor] = useState('#ffffff');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
   const [scale, setScale] = useState(0.3);
   const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
