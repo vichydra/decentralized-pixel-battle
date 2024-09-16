@@ -5,18 +5,19 @@ import ColorSelector from './ColorSelector';
 const WIDTH = 160;
 const HEIGHT = 90;
 const PIXEL_SIZE = 20;
+const windowH = window.innerHeight;
 
 const oneMinuteLater = 1 * 60 * 1000; 
 
 const PixelCanvas = () => {
   const canvasRef = useRef(null);
   const [selectedTimeLock, setSelectedTimeLock] = useState(oneMinuteLater);
-  const [selectedColor, setSelectedColor] = useState('#000000');
+  const [selectedColor, setSelectedColor] = useState('#FFFFFF');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
-  const [scale, setScale] = useState(0.8);
+  const [scale, setScale] = useState(0.3);
   const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
   const [dragging, setDragging] = useState(false);
-  const [canvasPosition, setCanvasPosition] = useState({ x: 0, y: -900 });
+  const [canvasPosition, setCanvasPosition] = useState({ x: -10, y: -0.6 * windowH });
   const [startDrag, setStartDrag] = useState({ x: 0, y: 0 });
 
   const [pixelState, setPixelState] = useState(
