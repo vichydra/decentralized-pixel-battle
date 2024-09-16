@@ -2,7 +2,21 @@ import React from 'react';
 import './ColorSelector.css';
 
 const ColorSelector = ({ selectedColor, onColorChange }) => {
-  const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#000000', '#FFFFFF'];
+  const colors = [
+    '#FF0000', // Red
+    '#00FF00', // Green
+    '#0000FF', // Blue
+    '#FFFF00', // Yellow
+    '#FF00FF', // Magenta
+    '#00FFFF', // Cyan
+    '#000000', // Black
+    '#FFFFFF', // White
+    '#4c3228', // Brown
+    '#6a4a3a', // Brown 2
+    '#FFA500', // Orange
+    '#800080', // Purple
+    '#808080', // Gray
+  ];
 
   return (
     <div className="color-menu">
