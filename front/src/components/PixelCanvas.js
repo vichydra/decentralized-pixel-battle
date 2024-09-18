@@ -140,86 +140,6 @@ const PixelCanvas = () => {
     }
   };
 
-  const handleSave = () => {
-    const binaryArray = [];
-
-    for (let y = 0; y < HEIGHT; y++) {
-      for (let x = 0; x < WIDTH; x++) {
-        const { color, timestamp } = pixelState[y][x];
-
-        const colorInt = parseInt(color.slice(1), 16);
-        binaryArray.push((colorInt >> 16) & 255); // Red
-        binaryArray.push((colorInt >> 8) & 255);  // Green
-        binaryArray.push(colorInt & 255);         // Blue
-
-        const timestampBytes = new Uint8Array(new Uint32Array([timestamp]).buffer);
-        binaryArray.push(...timestampBytes);
-      }
-    }
-
-    const blob = new Blob([new Uint8Array(binaryArray)], { type: 'application/octet-stream' });
-    uploadBlob(blob);
-  };
-
-  const uploadBlob = async (blob) => {
-    const publisherUrl = 'https://publisher-devnet.walrus.space';
-    const aggregatorUrl = 'https://aggregator-devnet.walrus.space';
-    const numEpochs = 1;
-
-    try {
-      const response = await fetch(`${publisherUrl}/v1/store?epochs=${numEpochs}`, {
-        method: 'PUT',
-        body: blob,
-      });
-
-      if (response.status === 200) {
-        const storageInfo = await response.json();
-        displayUpload(storageInfo, blob.type, aggregatorUrl);
-      } else {
-        throw new Error('Something went wrong when storing the blob!');
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('An error occurred while uploading the file. Please check the console for details.');
-    }
-  };
-
-  const displayUpload = (storageInfo, mediaType, aggregatorUrl) => {
-    let info = {};
-    const SUI_NETWORK = "testnet";
-    const SUI_VIEW_TX_URL = `https://suiscan.xyz/${SUI_NETWORK}/tx`;
-    const SUI_VIEW_OBJECT_URL = `https://suiscan.xyz/${SUI_NETWORK}/object`;
-
-    if ('alreadyCertified' in storageInfo) {
-      info = {
-        status: 'Already certified',
-        blobId: storageInfo.alreadyCertified.blobId,
-        endEpoch: storageInfo.alreadyCertified.endEpoch,
-        suiRefType: 'Previous Sui Certified Event',
-        suiRef: storageInfo.alreadyCertified.event.txDigest,
-        suiBaseUrl: SUI_VIEW_TX_URL,
-      };
-    } else if ('newlyCreated' in storageInfo) {
-      info = {
-        status: 'Newly created',
-        blobId: storageInfo.newlyCreated.blobObject.blobId,
-        endEpoch: storageInfo.newlyCreated.blobObject.storage.endEpoch,
-        suiRefType: 'Associated Sui Object',
-        suiRef: storageInfo.newlyCreated.blobObject.id,
-        suiBaseUrl: SUI_VIEW_OBJECT_URL,
-      };
-    } else {
-      throw new Error('Unhandled successful response!');
-    }
-
-    const blobUrl = `${aggregatorUrl}/v1/${info.blobId}`;
-    const suiUrl = `${info.suiBaseUrl}/${info.suiRef}`;
-
-    console.log(`Blob successfully uploaded: ${blobUrl}`);
-    console.log(`Sui Object URL: ${suiUrl}`);
-    alert(`Blob uploaded successfully! Blob ID: ${info.blobId}`);
-  };
-
   return (
     <div className="pixel-canvas-wrapper">
       <div className="zoom-controls">
@@ -232,9 +152,6 @@ const PixelCanvas = () => {
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
-      </div>
-      <div className="save-walrus-container">
-        <button onClick={handleSave} className="btn btn-primary">Save on Walrus</button>
       </div>
       <div
         className="canva-container"
