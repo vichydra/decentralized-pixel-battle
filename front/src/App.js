@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import '@rainbow-me/rainbowkit/styles.css';
-import { getDefaultConfig, RainbowKitProvider, ConnectButton } from '@rainbow-me/rainbowkit';
+import { getDefaultConfig, RainbowKitProvider, ConnectButton, darkTheme } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { base, baseSepolia } from 'wagmi/chains';
@@ -31,7 +31,13 @@ function App() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
+        <RainbowKitProvider 
+          theme={darkTheme({
+            accentColor: '#EA5A47',
+            accentColorForeground: 'white',
+            borderRadius: 'small',
+          })} 
+        >
           <div className="App">
             <header className="App-header">
               <div className="logo-container">
