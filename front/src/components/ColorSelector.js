@@ -1,38 +1,70 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './ColorSelector.css';
 
 const ColorSelector = ({ selectedColor, onColorChange }) => {
-  const colors = [
-    '#FF0000', // Red
-    '#00FF00', // Green
-    '#0000FF', // Blue
-    '#FFFF00', // Yellow
-    '#FF00FF', // Magenta
-    '#00FFFF', // Cyan
-    '#000000', // Black
-    '#FFFFFF', // White
-    '#4c3228', // Brown
-    '#6a4a3a', // Brown 2
-    '#FFA500', // Orange
-    '#800080', // Purple
-    '#808080', // Gray
-  ];
+  const [slots, setSlots] = useState([
+    '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500'
+  ]);
+  const [activeSlot, setActiveSlot] = useState(0); // First slot selected by default
+  const colorInputRef = useRef(null); // Reference for hidden color input
+
+  useEffect(() => {
+    onColorChange(slots[activeSlot]); // Initialize the selected color from the first slot
+  }, [onColorChange, slots]);
+
+  // Handle slot selection
+  const handleSlotClick = (index) => {
+    setActiveSlot(index); // Set the clicked slot as active
+    onColorChange(slots[index]); // Update the color in PixelCanvas
+  };
+
+  // Handle color change from hidden color picker
+  const handleColorChange = (e) => {
+    const newColor = e.target.value;
+    if (activeSlot !== null) {
+      const updatedSlots = [...slots];
+      updatedSlots[activeSlot] = newColor; // Update the color of the active slot
+      setSlots(updatedSlots);
+      onColorChange(newColor); // Set the selected color globally
+    }
+  };
+
+  // Trigger color picker input when the selected slot is clicked
+  const handleSelectedSlotClick = () => {
+    if (activeSlot !== null) {
+      colorInputRef.current.click(); // Open the hidden color picker
+    }
+  };
 
   return (
-    <div className="color-menu">
-      {colors.map((color) => (
+    <div className="color-selector">
+      {activeSlot !== null && (
         <div
-          key={color}
-          className="color-swatch"
-          style={{
-            backgroundColor: color,
-            width: selectedColor === color ? '48px' : '40px',
-            height: selectedColor === color ? '48px' : '40px',
-            border: selectedColor === color ? '2px solid black' : 'none',
-          }}
-          onClick={() => onColorChange(color)}
+          className="selected-slot"
+          style={{ backgroundColor: slots[activeSlot] }}
+          onClick={handleSelectedSlotClick}
         />
-      ))}
+      )}
+
+      <input
+        type="color"
+        ref={colorInputRef}
+        style={{ display: 'none' }}
+        onChange={handleColorChange}
+      />
+
+      <div className="custom-slots">
+        {slots.map((slotColor, index) => (
+          <div
+            key={index}
+            className={`color-slot ${activeSlot === index ? 'active' : ''}`}
+            style={{
+              backgroundColor: slotColor,
+            }}
+            onClick={() => handleSlotClick(index)}
+          />
+        ))}
+      </div>
     </div>
   );
 };
