@@ -88,9 +88,9 @@ const PixelCanvas = () => {
 
   const handleWheel = (e) => {
     if (e.deltaY < 0) {
-      setScale((prevScale) => Math.min(prevScale + 0.1, 2));
+      setScale((prevScale) => Math.min(prevScale + 0.15, 2));
     } else {
-      setScale((prevScale) => Math.max(prevScale - 0.1, 0.1));
+      setScale((prevScale) => Math.max(prevScale - 0.15, 0.15));
     }
   };
 
@@ -135,7 +135,12 @@ const PixelCanvas = () => {
   return (
     <div className="pixel-canvas-wrapper">
       <div className="zoom-controls">
-        <img src="minus.svg" alt="Zoom Out" className="magnifying-glass" onClick={() => setScale(scale - 0.1)} />
+        <img
+          src="minus.svg"
+          alt="Zoom Out"
+          className="magnifying-glass"
+          onClick={() => setScale((prevScale) => Math.max(prevScale - 0.15, 0.15))}
+        />
         <input 
           type="range" 
           min="0.1" 
@@ -145,7 +150,12 @@ const PixelCanvas = () => {
           onChange={handleZoomChange} 
           className="zoom-slider" 
         />
-        <img src="plus.svg" alt="Zoom In" className="magnifying-glass" onClick={() => setScale(scale + 0.1)} />
+        <img
+          src="plus.svg"
+          alt="Zoom In"
+          className="magnifying-glass"
+          onClick={() => setScale((prevScale) => Math.min(prevScale + 0.1, 2))}
+        />
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
