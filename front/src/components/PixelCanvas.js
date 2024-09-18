@@ -24,8 +24,7 @@ const PixelCanvas = () => {
 
   const [pixelState, setPixelState] = useState(
     Array.from({ length: HEIGHT }, () =>
-      Array.from({ length: WIDTH }, () => ({ color: '#b6b6b6', timestamp: 0 }))
-    )
+      Array.from({ length: WIDTH }, () => ({ color: '#b6b6b6', timestamp: 0 })))
   );
 
   const handleColorChange = (color) => {
@@ -38,39 +37,38 @@ const PixelCanvas = () => {
     const x = Math.floor((e.clientX - rect.left) / (PIXEL_SIZE * scale)) * PIXEL_SIZE;
     const y = Math.floor((e.clientY - rect.top) / (PIXEL_SIZE * scale)) * PIXEL_SIZE;
     setHoveredPixel({ x, y });
-  
+
     if (dragging) {
       const dx = e.clientX - startDrag.x;
       const dy = e.clientY - startDrag.y;
       setCanvasPosition({ x: canvasPosition.x + dx, y: canvasPosition.y + dy });
       setStartDrag({ x: e.clientX, y: e.clientY });
-  
+
       setHasMoved(true);
     }
   };
-  
 
   const handleMouseClick = async () => {
     if (dragging || hasMoved) return;
-  
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const pixelX = hoveredPixel.x / PIXEL_SIZE;
     const pixelY = hoveredPixel.y / PIXEL_SIZE;
     const currentTime = Date.now();
-  
+
     if (currentTime > pixelState[pixelY][pixelX].timestamp) {
       ctx.fillStyle = selectedColor;
       ctx.fillRect(hoveredPixel.x, hoveredPixel.y, PIXEL_SIZE, PIXEL_SIZE);
-  
+
       const updatedPixelState = [...pixelState];
       updatedPixelState[pixelY][pixelX] = {
         color: selectedColor,
         timestamp: currentTime + selectedTimeLock
       };
       setPixelState(updatedPixelState);
-  
-      // Salvar o pixel atualizado
+
+      // Save the updated pixel
       await setDoc(doc(db, "pixelState", `${pixelX}-${pixelY}`), {
         x: pixelX,
         y: pixelY,
@@ -78,7 +76,7 @@ const PixelCanvas = () => {
         timestamp: currentTime + selectedTimeLock
       });
     } else {
-      alert('Este pixel está bloqueado até ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
+      alert('This pixel is locked until ' + new Date(pixelState[pixelY][pixelX].timestamp).toLocaleString());
     }
   };
 
@@ -99,30 +97,28 @@ const PixelCanvas = () => {
   const handleMouseDown = (e) => {
     setDragging(true);
     setStartDrag({ x: e.clientX, y: e.clientY });
-    setHasMoved(false);  
+    setHasMoved(false);
   };
-  
 
   const handleMouseUp = () => {
     setDragging(false);
   };
 
   useEffect(() => {
-    // Set up a real-time listener for pixel state changes
     const unsubscribe = onSnapshot(collection(db, "pixelState"), (snapshot) => {
       const newPixelState = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill({ color: '#000000', timestamp: 0 }));
-  
+
       snapshot.forEach((doc) => {
         const { x, y, color, timestamp } = doc.data();
         newPixelState[y][x] = { color, timestamp };
       });
-  
+
       setPixelState(newPixelState);
       redrawCanvas(newPixelState);
     });
 
-    return () => unsubscribe(); // Clean up the listener when the component unmounts
-  }, []);  
+    return () => unsubscribe();
+  }, []);
 
   const redrawCanvas = (newPixelState) => {
     const canvas = canvasRef.current;
@@ -139,6 +135,7 @@ const PixelCanvas = () => {
   return (
     <div className="pixel-canvas-wrapper">
       <div className="zoom-controls">
+        <img src="minus.svg" alt="Zoom Out" className="magnifying-glass" onClick={() => setScale(scale - 0.1)} />
         <input 
           type="range" 
           min="0.3" 
@@ -148,6 +145,7 @@ const PixelCanvas = () => {
           onChange={handleZoomChange} 
           className="zoom-slider" 
         />
+        <img src="plus.svg" alt="Zoom In" className="magnifying-glass" onClick={() => setScale(scale + 0.1)} />
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
