@@ -4,8 +4,8 @@ import ColorSelector from './ColorSelector';
 import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
-const WIDTH = 160;
-const HEIGHT = 90;
+const WIDTH = 480;
+const HEIGHT = 270;
 const PIXEL_SIZE = 20;
 const windowH = window.innerHeight;
 const oneMinuteLater = 1 * 60 * 1000;
@@ -16,8 +16,8 @@ const PixelCanvas = () => {
   const [selectedColor, setSelectedColor] = useState('#ffffff');
   const [hoveredPixel, setHoveredPixel] = useState({ x: null, y: null });
   const [hasMoved, setHasMoved] = useState(false);
-  const [scale, setScale] = useState(0.3);
-  const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '25%' });
+  const [scale, setScale] = useState(0.15);
+  const [transformOrigin, setTransformOrigin] = useState({ x: '50%', y: '44%' });
   const [dragging, setDragging] = useState(false);
   const [canvasPosition, setCanvasPosition] = useState({ x: -10, y: -0.61 * windowH });
   const [startDrag, setStartDrag] = useState({ x: 0, y: 0 });
@@ -90,7 +90,7 @@ const PixelCanvas = () => {
     if (e.deltaY < 0) {
       setScale((prevScale) => Math.min(prevScale + 0.1, 2));
     } else {
-      setScale((prevScale) => Math.max(prevScale - 0.1, 0.3));
+      setScale((prevScale) => Math.max(prevScale - 0.1, 0.1));
     }
   };
 
@@ -138,7 +138,7 @@ const PixelCanvas = () => {
         <img src="minus.svg" alt="Zoom Out" className="magnifying-glass" onClick={() => setScale(scale - 0.1)} />
         <input 
           type="range" 
-          min="0.3" 
+          min="0.1" 
           max="2" 
           step="0.1" 
           value={scale} 
