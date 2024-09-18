@@ -38,6 +38,7 @@ function App() {
                 <img src={logo} alt="Logo" className="logo-icon" />
                 <span className="logo-text">PIXELSPACE</span>
               </div>
+              <ConnectButton />
             </header> 
             <main>
               <PixelCanvas/>

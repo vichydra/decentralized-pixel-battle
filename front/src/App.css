@@ -19,7 +19,9 @@
   background-color: rgba(0, 0, 0, 1);
   width: 100%;
   display: flex;
-  padding: 20px;
+  padding: 5%;
+  padding-top: 20px;
+  padding-bottom: 20px;
   justify-content: space-between; 
   align-items: center;
   box-sizing: border-box;
@@ -29,7 +31,6 @@
 .logo-container {
   display: flex;
   align-items: center;
-  margin-left: 5%;
 }
 
 .logo-icon {
@@ -40,8 +41,9 @@
 
 .logo-text {
   font-family: 'Minecraft', sans-serif;
-  font-size: 24px;
+  font-size: 30px;
   color: #ffffff; 
+  margin-top: 8px;
 }
 
 main {
