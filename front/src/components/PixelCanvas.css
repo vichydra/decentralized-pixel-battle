@@ -38,57 +38,49 @@ html, body {
   flex-direction: column;
   gap: 10px;
   z-index: 10;
-}
-
-.zoom-controls button {
-  padding: 10px 20px;
-  cursor: pointer;
   background-color: #ffffff;
-  border: 1px solid #420b3e;
-  border-radius: 5px;
+  border: 2px solid #420b3e;
+  padding: 10px;
+  border-radius: 10px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  opacity: 0.9;
-  background-color: #be63da;
 }
 
-.zoom-controls button:hover {
-  background-color: #bb8aca;
-  transition: .1s ease-in-out;
+.zoom-slider {
+  -webkit-appearance: none;
+  width: 150px;
+  height: 8px;
+  border-radius: 5px;
+  background: #ddd;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
 
-.zoom-in-img, .zoom-out-img {
+.zoom-slider:hover {
+  opacity: 1;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
   width: 20px;
   height: 20px;
+  border-radius: 50%;
+  background: #be63da;
+  cursor: pointer;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #be63da;
+  cursor: pointer;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 
 .canvas {
   border: 4px solid #ffffff;
   cursor: crosshair;
-}
-
-.save-walrus-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 20;
-}
-
-.save-walrus-container button {
-  padding: 10px 20px;
-  cursor: pointer;
-  background-color: #ffffff;
-  border: 2px solid #420b3e;
-  border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  font-size: 16px;
-  font-weight: bold;
-  color: #420b3e;
-  opacity: 0.9;
-  transition: background-color 0.3s ease;
-}
-
-.save-walrus-container button:hover {
-  background-color: #be63da;
-  color: #ffffff;
-  transition: 0.2s ease-in-out;
 }

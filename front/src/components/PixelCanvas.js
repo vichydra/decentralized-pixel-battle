@@ -82,21 +82,17 @@ const PixelCanvas = () => {
     }
   };
 
-  const handleZoomIn = () => {
+  const handleZoomChange = (e) => {
+    const newScale = parseFloat(e.target.value);
+    setScale(newScale);
     setTransformOrigin({ x: '50%', y: '50%' });
-    setScale((prevScale) => Math.max(prevScale + 0.1, 0.3));
-  };
-
-  const handleZoomOut = () => {
-    setTransformOrigin({ x: '50%', y: '50%' });
-    setScale((prevScale) => Math.max(prevScale - 0.1, 0.3));
   };
 
   const handleWheel = (e) => {
     if (e.deltaY < 0) {
-      handleZoomIn(e);
+      setScale((prevScale) => Math.min(prevScale + 0.1, 2));
     } else {
-      handleZoomOut();
+      setScale((prevScale) => Math.max(prevScale - 0.1, 0.3));
     }
   };
 
@@ -143,12 +139,15 @@ const PixelCanvas = () => {
   return (
     <div className="pixel-canvas-wrapper">
       <div className="zoom-controls">
-        <button onClick={handleZoomIn} className="zoom-in-button">
-          <img alt="zoom-in" className="zoom-in-img" src="https://www.svgrepo.com/show/2087/plus.svg" />
-        </button>
-        <button onClick={handleZoomOut} className="zoom-out-button">
-          <img alt="zoom-out" className="zoom-out-img" src="https://www.svgrepo.com/show/45046/minus.svg" />
-        </button>
+        <input 
+          type="range" 
+          min="0.3" 
+          max="2" 
+          step="0.1" 
+          value={scale} 
+          onChange={handleZoomChange} 
+          className="zoom-slider" 
+        />
       </div>
       <div className="selectors">
         <ColorSelector selectedColor={selectedColor} onColorChange={handleColorChange} />
